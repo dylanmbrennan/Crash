@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Trafficker - Provably fair crash game with 97% RTP. Place your bet and cash out before the crash!">
+    <meta name="keywords" content="crash game, provably fair, multiplier game, betting game">
+    
+    <!-- Open Graph for social sharing -->
+    <meta property="og:title" content="Trafficker - Provably Fair Crash Game">
+    <meta property="og:description" content="US fighter jet vs Venezuelan speedboat. Provably fair with 97% RTP!">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    
+    <title>Trafficker - Provably Fair Crash Game | 97% RTP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #000000;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .game-board {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #FF3E9D 0%, #0E76FD 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', Arial, sans-serif;
+        }
+
+        .balance {
+            background: linear-gradient(135deg, #FF3E9D15 0%, #0E76FD15 100%);
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .balance-amount {
+            color: #00FF88;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .multiplier-display {
+            background: linear-gradient(180deg, #1E90FF 0%, #1E90FF 70%, #0A4D8C 70%, #0A4D8C 100%);
+            height: 35vh;
+            max-height: 300px;
+            min-height: 250px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: background 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .multiplier-display.active {
+            background: linear-gradient(180deg, #00D4FF 0%, #00D4FF 70%, #0085C7 70%, #0085C7 100%);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.4), 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .multiplier-display.crashed {
+            background: linear-gradient(180deg, #FF3E9D 0%, #FF3E9D 70%, #C71585 70%, #C71585 100%);
+            animation: crashShake 0.5s ease-in-out;
+            box-shadow: 0 0 40px rgba(255, 62, 157, 0.5), 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes crashShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-4px); }
+        }
+
+        .multiplier-value {
+            font-size: 72px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.1s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', Arial, sans-serif;
+        }
+
+        /* Win Celebration Particles */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #2ed573;
+            position: absolute;
+            animation: confettiFall 3s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .multiplier-value.hidden {
+            display: none;
+        }
+
+        .multiplier-display.active .multiplier-value {
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .status-text {
+            font-size: 16px;
+            opacity: 1;
+            text-align: center;
+            padding: 0 10px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            z-index: 5;
+            transition: color 0.3s ease;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .status-text.win-text {
+            color: #00FF88;
+            animation: none;
+            font-weight: 800;
+        }
+
+        .betting-text {
+            font-size: 18px;
+            font-weight: 700;
+            position: relative;
+            bottom: auto;
+            margin-top: 10px;
+        }
+
+        .loading-bar-container {
+            width: 80%;
+            max-width: 300px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .loading-bar-container.active {
+            display: block;
+        }
+
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #FF3E9D 0%, #0E76FD 100%);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(255, 62, 157, 0.5);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .bet-controls-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .bet-amount-section {
+            flex: 0.3;
+            display: flex;
+            flex-direction: column;
+            min-width: 70px;
+            max-width: 100px;
+        }
+
+        .bet-action-section {
+            flex: 1.7;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 13px;
+            opacity: 0.7;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 0;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #FF3E9D;
+            box-shadow: 0 0 0 3px rgba(255, 62, 157, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 8px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', Arial, sans-serif;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-bet {
+            background: linear-gradient(135deg, #0E76FD 0%, #6C5CE7 100%);
+            color: #fff;
+        }
+
+        .btn-cashout {
+            background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);
+            color: #000;
+            font-weight: 800;
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, #FF3E9D 0%, #0E76FD 100%);
+            color: #fff;
+        }
+
+        .btn-action.cashout-mode {
+            background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);
+            color: #000;
+        }
+
+        .btn-action.cancel-mode {
+            background: linear-gradient(135deg, #FF3E9D 0%, #FF6B6B 100%);
+            color: #fff;
+        }
+
+        @keyframes highlight-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 107, 107, 0.6); }
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quick-bet {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .quick-bet-btn {
+            padding: 10px 6px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 700;
+            touch-action: manipulation;
+            flex: 1;
+            min-width: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-bet-btn:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.95);
+        }
+
+        .quick-bet-btn.selected {
+            background: linear-gradient(135deg, #FF3E9D 0%, #0E76FD 100%);
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(255, 62, 157, 0.4);
+        }
+
+        .history {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .history-title {
+            font-size: 16px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .history-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .history-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            min-width: 70px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .history-item:hover {
+            transform: scale(1.05);
+        }
+
+        .history-item::after {
+            content: '🔒';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+            opacity: 0.6;
+        }
+
+        .history-item.win {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+        }
+
+        .history-item.loss {
+            background: rgba(238, 9, 121, 0.2);
+            color: #ff6b9d;
+        }
+
+        .verify-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .verify-modal.active {
+            display: block;
+        }
+
+        .verify-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .verify-result {
+            background: rgba(46, 213, 115, 0.1);
+            border: 2px solid #2ed573;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2ed573;
+        }
+
+        .seed-info-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .seed-info-box h4 {
+            color: #2ed573;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .seed-value {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            word-break: break-all;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .verify-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .verify-button:active {
+            transform: scale(0.98);
+        }
+
+        .provably-fair-footer {
+            position: static;
+            width: 100%;
+            padding: 15px;
+            background: rgba(26, 26, 46, 0.98);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(46, 213, 115, 0.2);
+            margin-top: 20px;
+        }
+
+        .provably-fair-btn {
+            width: 100%;
+            padding: 15px;
+            background: rgba(46, 213, 115, 0.2);
+            border: 2px solid rgba(46, 213, 115, 0.5);
+            border-radius: 10px;
+            color: #2ed573;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .provably-fair-btn:active {
+            transform: scale(0.98);
+            background: rgba(46, 213, 115, 0.3);
+        }
+
+        .provably-fair-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1a1a2e;
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .provably-fair-modal.active {
+            display: block;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+        }
+
+        .shield-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        .modal-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .modal-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-section h3 {
+            color: #2ed573;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .modal-section p {
+            line-height: 1.6;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .seed-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .seed-box {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .seed-label {
+            font-size: 12px;
+            opacity: 0.6;
+            margin-bottom: 5px;
+        }
+
+        .diagram {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 24px;
+            line-height: 1.8;
+        }
+
+        .hash-output {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+
+        .boat {
+            position: absolute;
+            bottom: calc(30% - 20px);
+            left: -120px;
+            transition: all 0.1s linear;
+            z-index: 2;
+            width: 120px;
+            height: 50px;
+        }
+
+        .multiplier-display.active .boat {
+            animation: sail 8s linear infinite;
+        }
+
+        @keyframes sail {
+            0% { left: -120px; }
+            100% { left: calc(100% + 120px); }
+        }
+
+        .boat svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .machine-gun {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            transition: transform 0.1s;
+            width: 100px;
+            height: 60px;
+        }
+
+        .machine-gun.firing {
+            animation: recoilHorizontal 0.1s ease-out;
+        }
+
+        @keyframes recoilHorizontal {
+            0%, 100% { transform: translateX(-50%) translateX(0); }
+            50% { transform: translateX(-50%) translateX(2px); }
+        }
+
+        .machine-gun svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+        }
+
+        .bullet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff6b00;
+            border-radius: 50%;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            z-index: 3;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.8);
+        }
+
+        .bullet.firing {
+            opacity: 1;
+        }
+
+        .muzzle-flash {
+            position: absolute;
+            top: 67px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            opacity: 0;
+            z-index: 2;
+        }
+
+        .muzzle-flash.active {
+            animation: flash 0.1s ease-out;
+        }
+
+        @keyframes flash {
+            0% { opacity: 1; transform: translateX(-50%) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) scale(1.5); }
+        }
+
+        .explosion {
+            position: absolute;
+            font-size: 80px;
+            opacity: 0;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .explosion.active {
+            animation: explode 0.8s ease-out;
+        }
+
+        @keyframes explode {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5);
+            }
+        }
+
+        .water-waves {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: -100%;
+            width: 200%;
+            height: 60px;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.05) 0px,
+                rgba(255, 255, 255, 0.15) 40px,
+                rgba(255, 255, 255, 0.05) 80px
+            );
+            animation: wave-animation 3s linear infinite;
+        }
+
+        @keyframes wave-animation {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(50%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-board">
+            <div class="header">
+                <h1>Trafficker</h1>
+                <div class="balance">
+                    Balance: <span class="balance-amount" id="balance">1000.00</span> USDT
+                </div>
+            </div>
+
+            <div class="multiplier-display" id="multiplierDisplay">
+                <div class="machine-gun" id="machineGun">
+                    <svg viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Option 5: Horizontal Flight with slight nose-down angle -->
+                        
+                        <!-- Tail section -->
+                        <path d="M 20 38 L 18 28 L 22 25 L 26 28 L 24 38 Z" 
+                              fill="#888" 
+                              stroke="#666" 
+                              stroke-width="1"/>
+                        
+                        <!-- Twin Engines -->
+                        <ellipse cx="20" cy="33" rx="4" ry="3" fill="#333" stroke="#222" stroke-width="1"/>
+                        <ellipse cx="24" cy="37" rx="4" ry="3" fill="#333" stroke="#222" stroke-width="1"/>
+                        
+                        <!-- Afterburner flames pointing back/down -->
+                        <ellipse cx="16" cy="34" rx="6" ry="3" fill="#ff6600" opacity="0.9">
+                            <animate attributeName="rx" values="6;9;6" dur="0.15s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="13" cy="34" rx="4" ry="2.5" fill="#ffaa00" opacity="0.8">
+                            <animate attributeName="rx" values="4;6;4" dur="0.12s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="20" cy="38" rx="6" ry="3" fill="#ff6600" opacity="0.9">
+                            <animate attributeName="rx" values="6;9;6" dur="0.15s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="17" cy="38" rx="4" ry="2.5" fill="#ffaa00" opacity="0.8">
+                            <animate attributeName="rx" values="4;6;4" dur="0.12s" repeatCount="indefinite"/>
+                        </ellipse>
+                        
+                        <!-- Main fuselage body -->
+                        <ellipse cx="70" cy="40" rx="45" ry="9" 
+                                 fill="#999" 
+                                 stroke="#777" 
+                                 stroke-width="2"/>
+                        
+                        <!-- Bottom shadow -->
+                        <ellipse cx="70" cy="43" rx="43" ry="4" 
+                                 fill="#666" 
+                                 opacity="0.3"/>
+                        
+                        <!-- Top highlight -->
+                        <ellipse cx="70" cy="37" rx="43" ry="4" 
+                                 fill="#b8b8b8" 
+                                 opacity="0.5"/>
+                        
+                        <!-- Cockpit canopy -->
+                        <ellipse cx="85" cy="37" rx="10" ry="5" 
+                                 fill="#1e3a5f" 
+                                 opacity="0.7"
+                                 stroke="#333"
+                                 stroke-width="1"/>
+                        
+                        <!-- Cockpit frame -->
+                        <line x1="78" y1="37" x2="92" y2="37" 
+                              stroke="#222" 
+                              stroke-width="0.8" 
+                              opacity="0.5"/>
+                        
+                        <!-- Delta wings -->
+                        <!-- Left wing (top) -->
+                        <path d="M 65 38 L 50 25 L 52 27 L 55 30 L 63 36 Z" 
+                              fill="#a8a8a8" 
+                              stroke="#888" 
+                              stroke-width="1.5"/>
+                        
+                        <!-- Right wing (bottom) -->
+                        <path d="M 75 40 L 90 28 L 88 30 L 85 33 L 77 39 Z" 
+                              fill="#a0a0a0" 
+                              stroke="#888" 
+                              stroke-width="1.5"/>
+                        
+                        <!-- US FLAG on fuselage (prominent placement) -->
+                        <g transform="translate(55, 36)">
+                            <!-- Red stripes -->
+                            <rect x="0" y="0" width="16" height="8" fill="#B22234" rx="0.5"/>
+                            <!-- White stripes -->
+                            <rect x="0" y="1.2" width="16" height="1" fill="#fff"/>
+                            <rect x="0" y="3.4" width="16" height="1" fill="#fff"/>
+                            <rect x="0" y="5.6" width="16" height="1" fill="#fff"/>
+                            <!-- Blue canton -->
+                            <rect x="0" y="0" width="6" height="4.5" fill="#3C3B6E"/>
+                            <!-- Stars (9 stars in 3x3 grid) -->
+                            <circle cx="1" cy="0.8" r="0.35" fill="#fff"/>
+                            <circle cx="3" cy="0.8" r="0.35" fill="#fff"/>
+                            <circle cx="5" cy="0.8" r="0.35" fill="#fff"/>
+                            <circle cx="1" cy="2.2" r="0.35" fill="#fff"/>
+                            <circle cx="3" cy="2.2" r="0.35" fill="#fff"/>
+                            <circle cx="5" cy="2.2" r="0.35" fill="#fff"/>
+                            <circle cx="1" cy="3.6" r="0.35" fill="#fff"/>
+                            <circle cx="3" cy="3.6" r="0.35" fill="#fff"/>
+                            <circle cx="5" cy="3.6" r="0.35" fill="#fff"/>
+                        </g>
+                        
+                        <!-- Roundel on visible top wing -->
+                        <g transform="translate(58, 31)">
+                            <circle cx="0" cy="0" r="4" fill="#fff"/>
+                            <circle cx="0" cy="0" r="3.5" fill="#B22234"/>
+                            <circle cx="0" cy="0" r="2" fill="#3C3B6E"/>
+                            <circle cx="0" cy="0" r="1" fill="#fff"/>
+                        </g>
+                        
+                        <!-- Nose cone -->
+                        <path d="M 115 40 L 122 38 L 125 40 L 122 42 L 115 40 Z" 
+                              fill="#666"
+                              stroke="#555"
+                              stroke-width="1"/>
+                        
+                        <!-- Nose cone highlight -->
+                        <line x1="115" y1="39" x2="122" y2="38" 
+                              stroke="#888" 
+                              stroke-width="0.8" 
+                              opacity="0.5"/>
+                        
+                        <!-- Panel lines on fuselage -->
+                        <line x1="35" y1="40" x2="110" y2="40" 
+                              stroke="#666" 
+                              stroke-width="0.5" 
+                              opacity="0.3"/>
+                        <line x1="45" y1="37" x2="100" y2="37" 
+                              stroke="#888" 
+                              stroke-width="0.3" 
+                              opacity="0.2"/>
+                        
+                        <!-- Air intakes -->
+                        <ellipse cx="62" cy="43" rx="3" ry="1.5" 
+                                 fill="#333" 
+                                 opacity="0.6"/>
+                        <ellipse cx="78" cy="43" rx="3" ry="1.5" 
+                                 fill="#333" 
+                                 opacity="0.6"/>
+                    </svg>
+                </div>
+                <div class="muzzle-flash" id="muzzleFlash">💥</div>
+                <div class="explosion" id="explosion">💥</div>
+                <div class="multiplier-value" id="multiplier">1.00x</div>
+                <div class="status-text" id="statusText">Place your bet!</div>
+                <div class="loading-bar-container" id="loadingBarContainer">
+                    <div class="loading-bar" id="loadingBar"></div>
+                </div>
+                <div class="water-waves">
+                    <div class="wave"></div>
+                </div>
+                <div class="boat" id="boat">
+                    <svg viewBox="0 0 140 40" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Miami Vice Style Cigarette Boat - Authentic Profile -->
+                        
+                        <!-- Main V-hull bottom (deep V shape) -->
+                        <path d="M 8 30 L 5 32 L 4 34 L 125 34 L 127 32 L 125 30 L 122 28 L 20 28 L 12 29 Z" 
+                              fill="#0a0a0a" 
+                              stroke="#000" 
+                              stroke-width="1.5"/>
+                        
+                        <!-- Hull side (black with slight curve) -->
+                        <path d="M 12 29 L 122 28 L 125 29.5 L 127 31 L 125 33 L 8 33 L 6 31.5 Z" 
+                              fill="#1a1a1a"/>
+                        
+                        <!-- Sharp strake/spray rail -->
+                        <line x1="15" y1="29.5" x2="122" y2="28.5" 
+                              stroke="#2a2a2a" 
+                              stroke-width="1.5"/>
+                        
+                        <!-- Upper hull/gunwale -->
+                        <path d="M 15 24 L 120 24 L 122 26 L 124 28 L 20 28 L 12 27 Z" 
+                              fill="#1a1a1a" 
+                              stroke="#000" 
+                              stroke-width="1"/>
+                        
+                        <!-- Deck surface (very low profile) -->
+                        <path d="M 18 20 L 115 20 L 120 22 L 122 24 L 20 24 L 15 23 Z" 
+                              fill="#0a0a0a"/>
+                        
+                        <!-- VERY LOW windshield (Miami Vice boats had minimal windshields) -->
+                        <path d="M 55 17 L 52 20 L 78 20 L 75 17 Z" 
+                              fill="#0a0a0a" 
+                              stroke="#000" 
+                              stroke-width="1"/>
+                        
+                        <!-- Tinted windshield glass -->
+                        <path d="M 56 17.5 L 54 19.5 L 76 19.5 L 74 17.5 Z" 
+                              fill="#1a1a1a" 
+                              opacity="0.4"/>
+                        
+                        <!-- Long racing deck (signature cigarette feature) -->
+                        <path d="M 75 17 L 115 20 L 78 20 Z" 
+                              fill="#1a1a1a"/>
+                        
+                        <!-- Deck racing stripe -->
+                        <path d="M 77 18 L 113 19.5 L 78 20 Z" 
+                              fill="#2a2a2a" 
+                              opacity="0.5"/>
+                        
+                        <!-- Chrome rub rail -->
+                        <line x1="18" y1="26" x2="120" y2="26" 
+                              stroke="#606060" 
+                              stroke-width="1.5" 
+                              opacity="0.8"/>
+                        
+                        <!-- Venezuelan Flag decal -->
+                        <g transform="translate(60, 26)">
+                            <rect x="0" y="0" width="24" height="5" fill="#FFCC00"/>
+                            <rect x="0" y="1.7" width="24" height="1.7" fill="#00247D"/>
+                            <rect x="0" y="3.3" width="24" height="1.7" fill="#CF142B"/>
+                            <circle cx="3" cy="2.5" r="0.3" fill="#fff"/>
+                            <circle cx="7" cy="2.5" r="0.3" fill="#fff"/>
+                            <circle cx="12" cy="2.5" r="0.3" fill="#fff"/>
+                            <circle cx="17" cy="2.5" r="0.3" fill="#fff"/>
+                            <circle cx="21" cy="2.5" r="0.3" fill="#fff"/>
+                        </g>
+                        
+                        <!-- Razor-sharp bow (aggressive point) -->
+                        <path d="M 120 20 L 128 26 L 130 28 L 129 30 L 127 32 L 125 34 L 124 33 L 125 30 L 125 28 L 122 24 Z" 
+                              fill="#1a1a1a"
+                              stroke="#000" 
+                              stroke-width="1.5"/>
+                        
+                        <!-- Bow highlight (chrome accent) -->
+                        <line x1="122" y1="24" x2="127" y2="28" 
+                              stroke="#505050" 
+                              stroke-width="2" 
+                              opacity="0.7"/>
+                        
+                        <!-- Triple Mercury Racing outboards (huge engines) -->
+                        <rect x="8" y="25" width="7" height="8" 
+                              fill="#0a0a0a" 
+                              rx="1"
+                              stroke="#000" 
+                              stroke-width="1"/>
+                        <rect x="16" y="25" width="7" height="8" 
+                              fill="#0a0a0a" 
+                              rx="1"
+                              stroke="#000" 
+                              stroke-width="1"/>
+                        <rect x="24" y="25" width="7" height="8" 
+                              fill="#0a0a0a" 
+                              rx="1"
+                              stroke="#000" 
+                              stroke-width="1"/>
+                        
+                        <!-- Engine cowling details (Mercury logo area) -->
+                        <ellipse cx="11.5" cy="28" rx="2.5" ry="2" 
+                                 fill="#2a2a2a" 
+                                 opacity="0.7"/>
+                        <ellipse cx="19.5" cy="28" rx="2.5" ry="2" 
+                                 fill="#2a2a2a" 
+                                 opacity="0.7"/>
+                        <ellipse cx="27.5" cy="28" rx="2.5" ry="2" 
+                                 fill="#2a2a2a" 
+                                 opacity="0.7"/>
+                        
+                        <!-- Engine lower units -->
+                        <rect x="9.5" y="31" width="4" height="1.5" 
+                              fill="#1a1a1a"/>
+                        <rect x="17.5" y="31" width="4" height="1.5" 
+                              fill="#1a1a1a"/>
+                        <rect x="25.5" y="31" width="4" height="1.5" 
+                              fill="#1a1a1a"/>
+                        
+                        <!-- Waterline -->
+                        <line x1="5" y1="33.5" x2="125" y2="33.5" 
+                              stroke="#0a0a0a" 
+                              stroke-width="0.8" 
+                              opacity="0.5"/>
+                    </svg>
+                        <line x1="74" y1="31" x2="76" y2="29" stroke="#2a2a2a" stroke-width="0.5"/>
+                        <line x1="78" y1="31" x2="80" y2="29" stroke="#2a2a2a" stroke-width="0.5"/>
+                        <line x1="82" y1="31" x2="84" y2="29" stroke="#2a2a2a" stroke-width="0.5"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Bet Amount (USDT)</label>
+                    <div class="quick-bet">
+                        <button class="quick-bet-btn" onclick="setBet(1)">1</button>
+                        <button class="quick-bet-btn" onclick="setBet(2)">2</button>
+                        <button class="quick-bet-btn" onclick="setBet(3)">3</button>
+                        <button class="quick-bet-btn" onclick="setBet(4)">4</button>
+                        <button class="quick-bet-btn" onclick="setBet(5)">5</button>
+                    </div>
+                    <div class="bet-controls-row">
+                        <div class="bet-amount-section">
+                            <input type="number" id="betAmount" value="1" min="1" max="5" step="1" oninput="clearQuickBetSelection(); checkMaxBet()">
+                            <div id="maxBetWarning" style="color: #ff6b9d; font-size: 12px; margin-top: 5px; display: none;">Max bet is 5 USDT</div>
+                        </div>
+                        <div class="bet-action-section">
+                            <button class="btn btn-action" id="actionBtn" onclick="handleActionButton()">Place Bet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history">
+                <div class="history-title">Recent Games</div>
+                <div class="history-list" id="historyList">
+                    <div class="history-item loss">1.23x</div>
+                    <div class="history-item win">3.45x</div>
+                    <div class="history-item loss">1.67x</div>
+                    <div class="history-item win">2.89x</div>
+                    <div class="history-item loss">1.15x</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Provably Fair Footer Button -->
+        <div class="provably-fair-footer">
+            <button class="provably-fair-btn" onclick="openProvablyFairModal()">
+                <svg class="shield-icon" style="width: 24px; height: 24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="M9 12l2 2 4-4"/>
+                </svg>
+                Provably Fair - 100% FAIR GAME
+            </button>
+        </div>
+
+        <!-- Provably Fair Modal -->
+        <div class="provably-fair-modal" id="provablyFairModal">
+            <div class="modal-header">
+                <div></div>
+                <button class="modal-close" onclick="closeProvablyFairModal()">×</button>
+            </div>
+
+            <svg class="shield-icon" viewBox="0 0 100 100" fill="none" stroke="#2ed573" stroke-width="3">
+                <path d="M50 90 C 20 75, 10 60, 10 40 L 10 15 L 50 5 L 90 15 L 90 40 C 90 60, 80 75, 50 90 Z"/>
+                <path d="M35 45 L 45 55 L 65 35" stroke-width="4"/>
+            </svg>
+
+            <div class="modal-title">Provably Fair - 100% FAIR GAME</div>
+
+            <div class="modal-section">
+                <p>"Trafficker" is based on cryptographic technology called "Provably Fair". This technology guarantees 100% fairness of game result. With this technology, it's impossible for any third party to interfere in game process.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>HOW IT WORKS</h3>
+                <p><strong>Quick explanation:</strong></p>
+                <p>Result of each round (Game's crash multiplier) is generated using cryptographic technology that combines a server seed and your client seed. The server seed is committed before the round (you can see its hash), making it impossible to manipulate the outcome. This ensures 100% fairness and transparency with a 3% house edge (97% RTP).</p>
+                
+                <p style="margin-top: 20px;"><strong>More information:</strong></p>
+                <p>Each round result is generated from two independent components: the server seed (generated by the game operator) and your client seed (which you can set yourself). Before each round starts, we publish a hash of the server seed - this cryptographic commitment ensures we cannot change it after seeing your bet.</p>
+                <p>When the round starts, the game combines the server seed, your client seed, and a nonce (round counter). These are hashed together using SHA-256 cryptography to generate a provably random number, which determines the crash point. After the round, the server seed is revealed so you can verify the result was calculated fairly.</p>
+            </div>
+
+            <div class="modal-section">
+                <div class="diagram">
+                    <div style="display: flex; justify-content: center; align-items: flex-end; gap: 40px; margin: 30px 0;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">🖥️</div>
+                            <div style="font-size: 14px; opacity: 0.8;">Server Seed</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">👤</div>
+                            <div style="font-size: 14px; opacity: 0.8;">Client Seed</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">🔢</div>
+                            <div style="font-size: 14px; opacity: 0.8;">Nonce</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 25px 0; font-family: monospace;">
+                        <div style="width: 180px; height: 3px; background: #fff; border-radius: 2px;"></div>
+                        <div style="margin: 0 20px;">+</div>
+                        <div style="width: 180px; height: 3px; background: #fff; border-radius: 2px;"></div>
+                        <div style="margin: 0 20px;">+</div>
+                        <div style="width: 180px; height: 3px; background: #fff; border-radius: 2px;"></div>
+                    </div>
+                    
+                    <div style="font-size: 20px; text-align: center; margin: 15px 0;">||</div>
+                    
+                    <div style="font-size: 16px; text-align: center; margin: 15px 0; opacity: 0.9;">
+                        Combined String
+                    </div>
+                    
+                    <div style="font-size: 24px; text-align: center; margin: 15px 0;">↓</div>
+                    
+                    <div class="seed-label" style="text-align: center; font-size: 14px; opacity: 0.7; margin: 10px 0;">
+                        SHA-256
+                    </div>
+                    
+                    <div class="hash-output" style="margin: 15px auto; max-width: 90%;">
+                        8b66b893918da31d49763a6c420b4cad75a2663682bb317da79106facfb0...
+                    </div>
+                    
+                    <div style="font-size: 24px; text-align: center; margin: 15px 0;">↓</div>
+                    
+                    <div class="seed-box" style="font-size: 32px; padding: 20px; margin: 15px auto; max-width: 200px; text-align: center; background: rgba(46, 213, 115, 0.1); border: 2px solid #2ed573;">
+                        2.17x
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <h3>HOW TO CHECK</h3>
+                <p>- You can check fairness of each round from game history by clicking on any result (look for the 🔒 icon).</p>
+                <p>- In the verification window, you'll see the server seed, your client seed, nonce, combined hash, and the result.</p>
+                <p>- The hashed version of the next round's server seed is shown above (Next Server Seed). This proves we committed to it before the round starts.</p>
+                <p>- You can change your client seed at any time to ensure the game operator cannot predict outcomes.</p>
+                <p>- Click "Recalculate & Verify" to independently confirm the math is correct.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>CURRENT GAME SEEDS</h3>
+                <div class="seed-display">
+                    <div style="flex: 1;">
+                        <div class="seed-label">Next Server Seed (SHA-256 Hash)</div>
+                        <div class="seed-box" id="currentServerHash">Loading...</div>
+                        <p style="font-size: 11px; opacity: 0.6; margin-top: 8px;">This hash proves the server seed is set before the round starts</p>
+                    </div>
+                </div>
+                <div class="seed-display">
+                    <div style="flex: 1;">
+                        <div class="seed-label">Your Client Seed</div>
+                        <div class="seed-box" id="currentClientSeed">Loading...</div>
+                        <p style="font-size: 11px; opacity: 0.6; margin-top: 8px;">You can change this seed at any time</p>
+                        <button class="verify-button" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" onclick="changeClientSeed()">🔄 Change Client Seed</button>
+                    </div>
+                </div>
+                <div class="seed-display">
+                    <div style="flex: 1;">
+                        <div class="seed-label">Current Nonce</div>
+                        <div class="seed-box" id="currentNonce">0</div>
+                        <p style="font-size: 11px; opacity: 0.6; margin-top: 8px;">Increments with each round</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Modal -->
+        <div class="verify-modal" id="verifyModal">
+            <div class="modal-header">
+                <h2 style="color: #2ed573;">Verify Game Result</h2>
+                <button class="modal-close" onclick="closeVerifyModal()">×</button>
+            </div>
+
+            <div class="verify-content">
+                <div class="verify-result" id="verifyResultDisplay">
+                    Loading...
+                </div>
+
+                <div class="seed-info-box">
+                    <h4>Server Seed</h4>
+                    <div class="seed-value" id="verifyServerSeed"></div>
+                </div>
+
+                <div class="seed-info-box">
+                    <h4>Client Seed</h4>
+                    <div class="seed-value" id="verifyClientSeed"></div>
+                </div>
+
+                <div class="seed-info-box">
+                    <h4>Nonce</h4>
+                    <div class="seed-value" id="verifyNonce"></div>
+                </div>
+
+                <div class="seed-info-box">
+                    <h4>Combined String</h4>
+                    <div class="seed-value" id="verifyCombined"></div>
+                </div>
+
+                <div class="seed-info-box">
+                    <h4>SHA-256 Hash</h4>
+                    <div class="seed-value" id="verifyHash"></div>
+                </div>
+
+                <div class="seed-info-box">
+                    <h4>Timestamp</h4>
+                    <div class="seed-value" id="verifyTimestamp"></div>
+                </div>
+
+                <button class="verify-button" onclick="recalculateResult()">🔄 Recalculate & Verify</button>
+                <button class="verify-button" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);" onclick="closeVerifyModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sound System using Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let soundEnabled = true;
+        
+        const sounds = {
+            bet: () => playBeep(400, 0.1, 'sine'),
+            cashout: () => playBeep(800, 0.2, 'sine', [800, 1200]),
+            crash: () => playBeep(200, 0.3, 'sawtooth'),
+            tick: () => playBeep(600, 0.05, 'sine'),
+            win: () => playWinSound(),
+            button: () => playBeep(300, 0.05, 'sine'),
+            gunshot: () => playGunshot(),
+            bomb: () => playBombSound()
+        };
+
+        function playBeep(frequency, duration, type = 'sine', glide = null) {
+            if (!soundEnabled) return;
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = type;
+                oscillator.frequency.value = frequency;
+                
+                if (glide) {
+                    oscillator.frequency.setValueAtTime(glide[0], audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(glide[1], audioContext.currentTime + duration);
+                }
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playGunshot() {
+            if (!soundEnabled) return;
+            try {
+                // Create noise for gunshot effect
+                const bufferSize = audioContext.sampleRate * 0.05; // 50ms
+                const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                // Generate white noise
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                
+                const noise = audioContext.createBufferSource();
+                noise.buffer = buffer;
+                
+                const noiseFilter = audioContext.createBiquadFilter();
+                noiseFilter.type = 'bandpass';
+                noiseFilter.frequency.value = 1000;
+                
+                const noiseGain = audioContext.createGain();
+                noiseGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+                
+                noise.connect(noiseFilter);
+                noiseFilter.connect(noiseGain);
+                noiseGain.connect(audioContext.destination);
+                
+                noise.start(audioContext.currentTime);
+                noise.stop(audioContext.currentTime + 0.05);
+            } catch(e) {}
+        }
+
+        function playBombSound() {
+            if (!soundEnabled) return;
+            try {
+                // Deep explosion sound
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator1.type = 'sawtooth';
+                oscillator2.type = 'sine';
+                
+                // Start high and drop quickly
+                oscillator1.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator1.frequency.exponentialRampToValueAtTime(40, audioContext.currentTime + 0.3);
+                
+                oscillator2.frequency.setValueAtTime(100, audioContext.currentTime);
+                oscillator2.frequency.exponentialRampToValueAtTime(20, audioContext.currentTime + 0.3);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                
+                oscillator1.connect(gainNode);
+                oscillator2.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator1.start(audioContext.currentTime);
+                oscillator2.start(audioContext.currentTime);
+                oscillator1.stop(audioContext.currentTime + 0.4);
+                oscillator2.stop(audioContext.currentTime + 0.4);
+                
+                // Add noise burst for explosion
+                setTimeout(() => {
+                    const bufferSize = audioContext.sampleRate * 0.2;
+                    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+                    }
+                    
+                    const noise = audioContext.createBufferSource();
+                    noise.buffer = buffer;
+                    
+                    const noiseGain = audioContext.createGain();
+                    noiseGain.gain.value = 0.2;
+                    
+                    noise.connect(noiseGain);
+                    noiseGain.connect(audioContext.destination);
+                    
+                    noise.start(audioContext.currentTime);
+                }, 50);
+            } catch(e) {}
+        }
+
+        function playWinSound() {
+            if (!soundEnabled) return;
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((note, i) => {
+                setTimeout(() => playBeep(note, 0.15, 'sine'), i * 100);
+            });
+        }
+
+        // Haptic Feedback
+        function haptic(style = 'medium') {
+            if (navigator.vibrate) {
+                const patterns = {
+                    light: 10,
+                    medium: 20,
+                    heavy: 50,
+                    success: [10, 50, 10],
+                    error: [50, 100, 50]
+                };
+                navigator.vibrate(patterns[style] || 20);
+            }
+        }
+
+        // Game Variables
+        let balance = 1000;
+        let currentBet = 0;
+        let multiplier = 1.00;
+        let isGameActive = false;
+        let hasActiveBet = false;
+        let gameInterval = null;
+        let crashPoint = 0;
+        let shootingInterval = null;
+        let gameLoopTimeout = null;
+        let bettingPhase = true;
+        let bettingTimeLeft = 5;
+        let bettingCountdown = null;
+        let betForNextRound = false; // Track if bet is for next round
+        
+        // Provably Fair System Variables
+        let serverSeed = generateRandomSeed();
+        let nextServerSeed = generateRandomSeed();
+        let clientSeed = generateRandomSeed();
+        let nonce = 0;
+        let gameHistory = [];
+        const HOUSE_EDGE = 0.03; // 3% house edge
+        const RTP = 0.97; // 97% RTP
+
+        const balanceElement = document.getElementById('balance');
+        const multiplierElement = document.getElementById('multiplier');
+        const statusText = document.getElementById('statusText');
+        const multiplierDisplay = document.getElementById('multiplierDisplay');
+        const actionBtn = document.getElementById('actionBtn');
+        const betAmountInput = document.getElementById('betAmount');
+        const historyList = document.getElementById('historyList');
+        const machineGunElement = document.getElementById('machineGun');
+        const muzzleFlashElement = document.getElementById('muzzleFlash');
+        const explosionElement = document.getElementById('explosion');
+        const boatElement = document.getElementById('boat');
+        const loadingBarContainer = document.getElementById('loadingBarContainer');
+        const loadingBar = document.getElementById('loadingBar');
+
+        // Start the continuous game loop when page loads
+        window.addEventListener('load', () => {
+            startBettingPhase();
+        });
+
+        function updateBalance() {
+            balanceElement.textContent = balance.toFixed(2);
+        }
+
+        // Provably Fair Functions
+        // Provably Fair Functions
+        function generateRandomSeed() {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let seed = '';
+            for (let i = 0; i < 32; i++) {
+                seed += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return seed;
+        }
+
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function generateCrashPointProvablyFair() {
+            // Combine server seed, client seed, and nonce
+            const combinedString = `${serverSeed}:${clientSeed}:${nonce}`;
+            const hash = await sha256(combinedString);
+            
+            // Convert first 8 characters of hash to decimal
+            const hashValue = parseInt(hash.substring(0, 8), 16);
+            
+            // Generate random value between 0 and 1
+            const randomValue = hashValue / 0xFFFFFFFF;
+            
+            // Bustabit-style formula for crash games
+            // Formula: crash = 97 / (100 * randomValue)
+            // With 97% house multiplier, this gives 97% RTP (3% house edge)
+            // The game crashes at this multiplier
+            let crash = 97 / (100 * randomValue);
+            
+            // Ensure minimum crash of 1.00x
+            if (crash < 1.00) crash = 1.00;
+            
+            // Cap at reasonable maximum (100x)
+            if (crash > 100) crash = 100;
+            
+            return parseFloat(crash.toFixed(2));
+        }
+
+        function showProvablyFairInfo() {
+            // Deprecated - use openProvablyFairModal instead
+            openProvablyFairModal();
+        }
+
+        async function openProvablyFairModal() {
+            const modal = document.getElementById('provablyFairModal');
+            modal.classList.add('active');
+            
+            // Update current seeds display
+            const serverHash = await sha256(nextServerSeed);
+            document.getElementById('currentServerHash').textContent = serverHash.substring(0, 32) + '...';
+            document.getElementById('currentClientSeed').textContent = clientSeed;
+            document.getElementById('currentNonce').textContent = nonce;
+        }
+
+        function closeProvablyFairModal() {
+            const modal = document.getElementById('provablyFairModal');
+            modal.classList.remove('active');
+        }
+
+        function changeClientSeed() {
+            // Generate new random seed automatically
+            const oldSeed = clientSeed;
+            clientSeed = generateRandomSeed();
+            
+            // Update display immediately
+            document.getElementById('currentClientSeed').textContent = clientSeed;
+            
+            // Show confirmation
+            alert(`✅ Client Seed Changed!\n\nOld: ${oldSeed}\n\nNew: ${clientSeed}\n\nYour new seed will be used for all future rounds.`);
+        }
+
+        async function openVerifyModal(gameIndex) {
+            const modal = document.getElementById('verifyModal');
+            const gameData = gameHistory[gameIndex];
+            
+            if (!gameData) {
+                alert('Game data not found');
+                return;
+            }
+            
+            modal.classList.add('active');
+            
+            // Display game data
+            document.getElementById('verifyResultDisplay').textContent = gameData.crashPoint + 'x';
+            document.getElementById('verifyServerSeed').textContent = gameData.serverSeed;
+            document.getElementById('verifyClientSeed').textContent = gameData.clientSeed;
+            document.getElementById('verifyNonce').textContent = gameData.nonce;
+            document.getElementById('verifyTimestamp').textContent = new Date(gameData.timestamp).toLocaleString();
+            
+            const combinedString = `${gameData.serverSeed}:${gameData.clientSeed}:${gameData.nonce}`;
+            document.getElementById('verifyCombined').textContent = combinedString;
+            
+            const hash = await sha256(combinedString);
+            document.getElementById('verifyHash').textContent = hash;
+            
+            // Store for recalculation
+            modal.dataset.gameIndex = gameIndex;
+        }
+
+        function closeVerifyModal() {
+            const modal = document.getElementById('verifyModal');
+            modal.classList.remove('active');
+        }
+
+        async function recalculateResult() {
+            const modal = document.getElementById('verifyModal');
+            const gameIndex = parseInt(modal.dataset.gameIndex);
+            const gameData = gameHistory[gameIndex];
+            
+            if (!gameData) return;
+            
+            // Show loading state on button
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Calculating...';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+            
+            // Simulate a brief delay for UX (shows the calculation is happening)
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Recalculate crash point
+            const combinedString = `${gameData.serverSeed}:${gameData.clientSeed}:${gameData.nonce}`;
+            const hash = await sha256(combinedString);
+            
+            // Convert first 8 characters of hash to decimal
+            const hashValue = parseInt(hash.substring(0, 8), 16);
+            const randomValue = hashValue / 0xFFFFFFFF;
+            let crash = 97 / (100 * randomValue); // 3% house edge, 97% RTP
+            
+            if (crash < 1.00) crash = 1.00;
+            if (crash > 100) crash = 100;
+            
+            const calculatedResult = crash.toFixed(2);
+            
+            // Reset button
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            
+            // Show verification result
+            if (calculatedResult === gameData.crashPoint) {
+                alert(`✅ VERIFIED!\n\nCalculated: ${calculatedResult}x\nRecorded: ${gameData.crashPoint}x\n\nThe game result is provably fair!`);
+            } else {
+                alert(`⚠️ MISMATCH!\n\nCalculated: ${calculatedResult}x\nRecorded: ${gameData.crashPoint}x\n\nPlease check the seeds.`);
+            }
+        }
+
+        function handleActionButton() {
+            if (hasActiveBet && isGameActive && !betForNextRound) {
+                // Button is in cashout mode
+                cashOut();
+            } else if (hasActiveBet && (bettingPhase || betForNextRound)) {
+                // Button is in cancel mode
+                cancelBet();
+            } else if (bettingPhase || isGameActive) {
+                // Button is in place bet mode
+                placeBet();
+            }
+        }
+
+        function updateActionButton() {
+            if (hasActiveBet && isGameActive && !betForNextRound) {
+                // Show cashout button with potential win - bet is for current game
+                const potentialWin = (currentBet * multiplier).toFixed(2);
+                actionBtn.textContent = `💰 Cash Out ${potentialWin} USDT`;
+                actionBtn.classList.remove('cancel-mode');
+                actionBtn.classList.add('cashout-mode');
+                actionBtn.disabled = false;
+            } else if (hasActiveBet && betForNextRound) {
+                // Show cancel button - bet is waiting for next round
+                actionBtn.textContent = '❌ Cancel Bet';
+                actionBtn.classList.remove('cashout-mode');
+                actionBtn.classList.add('cancel-mode');
+                actionBtn.disabled = false;
+            } else if (hasActiveBet && bettingPhase) {
+                // Show cancel bet button during betting phase
+                actionBtn.textContent = '❌ Cancel Bet';
+                actionBtn.classList.remove('cashout-mode');
+                actionBtn.classList.add('cancel-mode');
+                actionBtn.disabled = false;
+            } else if (bettingPhase || isGameActive) {
+                // Show place bet button (can bet during betting phase or active game)
+                actionBtn.textContent = 'Place Bet';
+                actionBtn.classList.remove('cashout-mode', 'cancel-mode');
+                actionBtn.disabled = false;
+            } else {
+                // Disable during transitions
+                actionBtn.textContent = 'Place Bet';
+                actionBtn.classList.remove('cashout-mode', 'cancel-mode');
+                actionBtn.disabled = true;
+            }
+        }
+
+        function startBettingPhase() {
+            bettingPhase = true;
+            bettingTimeLeft = 5;
+            multiplier = 1.00;
+            multiplierElement.textContent = '1.00x';
+            
+            // If there was a bet for next round, activate it now
+            if (betForNextRound) {
+                betForNextRound = false;
+            }
+            
+            // Hide multiplier during betting phase
+            multiplierElement.classList.add('hidden');
+            
+            // Show loading bar
+            loadingBarContainer.classList.add('active');
+            loadingBar.style.width = '0%';
+            
+            if (!hasActiveBet) {
+                betAmountInput.disabled = false;
+            }
+            
+            multiplierDisplay.classList.remove('active', 'crashed');
+            
+            updateActionButton();
+            statusText.textContent = 'PLACE YOUR BET';
+            statusText.classList.add('betting-text');
+            statusText.classList.remove('win-text'); // Remove green color when new round starts
+            
+            // Update loading bar progressively
+            let elapsedTime = 0;
+            const totalTime = 5000; // 5 seconds in ms
+            const updateInterval = 50; // Update every 50ms
+            
+            const loadingInterval = setInterval(() => {
+                elapsedTime += updateInterval;
+                const progress = (elapsedTime / totalTime) * 100;
+                loadingBar.style.width = progress + '%';
+                
+                if (elapsedTime >= totalTime) {
+                    clearInterval(loadingInterval);
+                }
+            }, updateInterval);
+            
+            bettingCountdown = setInterval(() => {
+                bettingTimeLeft--;
+                
+                if (bettingTimeLeft <= 0) {
+                    clearInterval(bettingCountdown);
+                    startGame();
+                }
+            }, 1000);
+        }
+
+        function setBet(amount) {
+            if ((!isGameActive && bettingPhase && !hasActiveBet) || (isGameActive && !hasActiveBet)) {
+                // Allow during betting phase OR during active game after cashing out
+                sounds.button();
+                haptic('light');
+                
+                betAmountInput.value = amount;
+                
+                // Remove selected class from all buttons
+                document.querySelectorAll('.quick-bet-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked button
+                event.target.classList.add('selected');
+            }
+        }
+
+        function clearQuickBetSelection() {
+            // Remove highlight from all quick bet buttons when user types manually
+            document.querySelectorAll('.quick-bet-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+
+        function checkMaxBet() {
+            const betAmount = parseFloat(betAmountInput.value);
+            const maxBetWarning = document.getElementById('maxBetWarning');
+            
+            if (betAmount > 5) {
+                maxBetWarning.style.display = 'block';
+                betAmountInput.value = 5; // Auto-correct to max
+            } else {
+                maxBetWarning.style.display = 'none';
+            }
+        }
+
+        function placeBet() {
+            const betAmount = parseFloat(betAmountInput.value);
+            
+            if (isNaN(betAmount) || betAmount <= 0) {
+                haptic('error');
+                alert('Please enter a valid bet amount');
+                return;
+            }
+
+            if (betAmount > 5) {
+                haptic('error');
+                alert('Maximum bet is 5 USDT');
+                return;
+            }
+
+            if (betAmount > balance) {
+                haptic('error');
+                alert('Insufficient balance!');
+                return;
+            }
+
+            if (hasActiveBet) {
+                haptic('error');
+                alert('You already have an active bet!');
+                return;
+            }
+
+            // Success - place bet
+            sounds.bet();
+            haptic('success');
+            
+            currentBet = betAmount;
+            balance -= betAmount;
+            updateBalance();
+            hasActiveBet = true;
+            
+            // Check if bet is placed during active game (not betting phase)
+            if (isGameActive && !bettingPhase) {
+                betForNextRound = true;
+                statusText.textContent = 'Waiting for next round...';
+            } else {
+                betForNextRound = false;
+                statusText.textContent = 'PLACE YOUR BET';
+            }
+
+            betAmountInput.disabled = true;
+            
+            updateActionButton();
+        }
+
+        function cancelBet() {
+            if (!hasActiveBet) return;
+
+            // Refund the bet
+            balance += currentBet;
+            updateBalance();
+
+            // Reset bet state
+            hasActiveBet = false;
+            currentBet = 0;
+            betForNextRound = false;
+            betAmountInput.disabled = false;
+
+            if (bettingPhase) {
+                statusText.textContent = 'PLACE YOUR BET';
+            } else if (isGameActive) {
+                statusText.textContent = 'Bombing! 💥';
+            }
+            
+            updateActionButton();
+        }
+
+        async function startGame() {
+            bettingPhase = false;
+            isGameActive = true;
+            multiplier = 1.00;
+            
+            // Generate provably fair crash point
+            crashPoint = await generateCrashPointProvablyFair();
+            
+            // Show multiplier when game starts
+            multiplierElement.classList.remove('hidden');
+            
+            // Hide loading bar
+            loadingBarContainer.classList.remove('active');
+            
+            multiplierDisplay.classList.add('active');
+            multiplierDisplay.classList.remove('crashed');
+            statusText.textContent = 'Bombing! 💥';
+            statusText.classList.remove('betting-text');
+            statusText.classList.remove('win-text'); // Remove green color when game starts
+            
+            // Only disable input if user has an active bet
+            if (!hasActiveBet) {
+                betAmountInput.disabled = false;
+            }
+            
+            updateActionButton();
+
+            let increment = 0.01;
+            let speed = 100;
+
+            // Shoot bullets periodically (miss until crash)
+            shootingInterval = setInterval(() => {
+                if (isGameActive && multiplier < crashPoint) {
+                    shootBullet(false); // Miss
+                }
+            }, 800);
+
+            gameInterval = setInterval(() => {
+                if (multiplier >= crashPoint) {
+                    crash();
+                    return;
+                }
+
+                multiplier += increment;
+                multiplierElement.textContent = multiplier.toFixed(2) + 'x';
+
+                if (hasActiveBet) {
+                    updateActionButton(); // Update button with new potential win
+                }
+
+                // Speed up as multiplier increases
+                if (multiplier > 2) increment = 0.02;
+                if (multiplier > 5) increment = 0.05;
+                if (multiplier > 10) increment = 0.10;
+
+            }, speed);
+        }
+
+        function shootBullet(hit) {
+            // Play gunshot sound
+            sounds.gunshot();
+            
+            // Gun recoil animation
+            machineGunElement.classList.add('firing');
+            setTimeout(() => machineGunElement.classList.remove('firing'), 100);
+
+            // Muzzle flash
+            muzzleFlashElement.classList.add('active');
+            setTimeout(() => muzzleFlashElement.classList.remove('active'), 100);
+
+            // Create bullet element
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet firing';
+            multiplierDisplay.appendChild(bullet);
+
+            let targetX, targetY;
+
+            if (hit) {
+                // Hit the boat - calculate boat's current position
+                const boatRect = boatElement.getBoundingClientRect();
+                const displayRect = multiplierDisplay.getBoundingClientRect();
+                targetX = boatRect.left - displayRect.left + (boatRect.width / 2);
+                targetY = boatRect.top - displayRect.top + (boatRect.height / 2);
+            } else {
+                // Miss - random position around the screen
+                const displayRect = multiplierDisplay.getBoundingClientRect();
+                const boatRect = boatElement.getBoundingClientRect();
+                const boatCenterX = boatRect.left - displayRect.left + (boatRect.width / 2);
+                const boatCenterY = boatRect.top - displayRect.top + (boatRect.height / 2);
+                
+                // Random offset from boat position (miss by various amounts)
+                const offsetX = (Math.random() - 0.5) * 200;
+                const offsetY = Math.random() * 100 + 100; // Go lower than boat
+                
+                targetX = boatCenterX + offsetX;
+                targetY = boatCenterY + offsetY;
+                
+                // Keep within bounds
+                targetX = Math.max(20, Math.min(displayRect.width - 20, targetX));
+                targetY = Math.max(100, Math.min(displayRect.height - 20, targetY));
+            }
+
+            // Animate bullet
+            const duration = 300;
+            const startX = parseFloat(getComputedStyle(bullet).left);
+            const startY = parseFloat(getComputedStyle(bullet).top);
+            
+            bullet.style.transition = `all ${duration}ms linear`;
+            setTimeout(() => {
+                bullet.style.left = targetX + 'px';
+                bullet.style.top = targetY + 'px';
+            }, 10);
+
+            // Remove bullet after animation
+            setTimeout(() => {
+                bullet.style.opacity = '0';
+                setTimeout(() => bullet.remove(), 200);
+            }, duration);
+
+            // If hit, show explosion
+            if (hit) {
+                setTimeout(() => {
+                    // Play bomb explosion sound
+                    sounds.bomb();
+                    
+                    explosionElement.style.left = targetX + 'px';
+                    explosionElement.style.top = targetY + 'px';
+                    explosionElement.classList.add('active');
+                    
+                    setTimeout(() => {
+                        explosionElement.classList.remove('active');
+                    }, 800);
+                }, duration);
+            }
+        }
+
+        // Confetti celebration for big wins
+        function celebrate() {
+            const colors = ['#2ed573', '#667eea', '#f093fb', '#feca57', '#ff6b6b'];
+            for (let i = 0; i < 20; i++) {  // Reduced from 50 to 20
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        function cashOut() {
+            if (!hasActiveBet || !isGameActive) return;
+
+            const winAmount = currentBet * multiplier;
+            balance += winAmount;
+            updateBalance();
+
+            // Win effects
+            sounds.cashout();
+            sounds.win();
+            haptic('success');
+            
+            // Big win celebration for 5x or more
+            if (multiplier >= 5) {
+                celebrate();
+            }
+
+            addToHistory(multiplier.toFixed(2), true);
+
+            statusText.textContent = `Cashed out at ${multiplier.toFixed(2)}x! Won ${winAmount.toFixed(2)}`;
+            statusText.classList.add('win-text');
+            
+            // Green text will stay until next status update (don't remove it with timeout)
+            
+            hasActiveBet = false;
+            currentBet = 0;
+            betForNextRound = false;
+            
+            // Re-enable betting input so user can place bet for next round
+            betAmountInput.disabled = false;
+            
+            updateActionButton();
+        }
+
+        function crash() {
+            clearInterval(gameInterval);
+            clearInterval(shootingInterval);
+            isGameActive = false;
+
+            // Save game result for provably fair verification
+            gameHistory.push({
+                serverSeed: serverSeed,
+                clientSeed: clientSeed,
+                nonce: nonce,
+                crashPoint: multiplier.toFixed(2),
+                timestamp: new Date().toISOString()
+            });
+
+            // Rotate seeds for next game
+            serverSeed = nextServerSeed;
+            nextServerSeed = generateRandomSeed();
+            nonce++;
+
+            // Fire the final bullet that hits
+            shootBullet(true);
+
+            setTimeout(() => {
+                // Crash effects - bomb explosion sound
+                sounds.bomb();
+                haptic('heavy');
+                
+                multiplierDisplay.classList.remove('active');
+                multiplierDisplay.classList.add('crashed');
+                
+                // Always remove green text class for crash messages
+                statusText.classList.remove('win-text');
+                
+                if (hasActiveBet && !betForNextRound) {
+                    // Bet was for this round - lost
+                    statusText.textContent = `💥 Hit at ${multiplier.toFixed(2)}x! Lost ${currentBet.toFixed(2)}`;
+                    addToHistory(multiplier.toFixed(2), false);
+                    hasActiveBet = false;
+                    currentBet = 0;
+                } else if (hasActiveBet && betForNextRound) {
+                    // Bet is queued for next round - keep it
+                    statusText.textContent = `💥 Hit at ${multiplier.toFixed(2)}x! Your bet is ready for next round.`;
+                    addToHistory(multiplier.toFixed(2), null);
+                } else {
+                    statusText.textContent = `💥 Hit at ${multiplier.toFixed(2)}x!`;
+                    addToHistory(multiplier.toFixed(2), null);
+                }
+
+                updateActionButton();
+            }, 500);
+
+            // Start next round after 3 seconds
+            gameLoopTimeout = setTimeout(() => {
+                startBettingPhase();
+            }, 3500);
+        }
+
+        function addToHistory(value, won) {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            if (won === true) {
+                historyItem.classList.add('win');
+            } else if (won === false) {
+                historyItem.classList.add('loss');
+            } else {
+                historyItem.classList.add('loss');
+            }
+            
+            historyItem.textContent = value + 'x';
+            
+            // Store game data in the element for verification
+            const gameData = gameHistory[gameHistory.length - 1];
+            if (gameData) {
+                historyItem.dataset.gameIndex = gameHistory.length - 1;
+                historyItem.onclick = function() {
+                    openVerifyModal(parseInt(this.dataset.gameIndex));
+                };
+            }
+            
+            historyList.insertBefore(historyItem, historyList.firstChild);
+            
+            // Keep only last 10 items
+            while (historyList.children.length > 10) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>
